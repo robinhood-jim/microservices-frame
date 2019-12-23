@@ -1,0 +1,73 @@
+spring:
+  datasource:
+    hikari:
+        jdbc-url: jdbc:mysql://localhost:3316/oauth2?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+        driver-class-name: com.mysql.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    jdbc-url: jdbc:mysql://localhost:3316/oauth2?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+    username: root
+    password: root
+
+
+  application:
+    name: oauth2-service
+  profiles:
+    active: dev
+  cloud:
+    consul:
+      host: 172.16.102.129
+      port: 8500
+      discovery:
+        register: true
+        tags: version=1.0,author=robinjim
+        healthCheckInterval: 5s
+        healthCheckPath: /health
+        service-name: oauth2-service
+
+  redis:
+    host: localhost
+    lettuce:
+      pool:
+        max-active: 10
+
+  session:
+    store-type: redis
+  messages:
+    basename: i18n/messages
+
+
+
+core:
+  type: com.zaxxer.hikari.HikariDataSource
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://localhost:3316/frameset?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+  username: root
+  password: root
+
+server:
+  port: 9098
+  servlet:
+    session:
+      timeout: "PT10M"
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    com.baeldung.cloud.openfeign.client: debug
+log:
+  level: DEBUG
+  home: ./logs
+
+login:
+  ignoreUrls: /oauth/**,/webjars/**,login,logout,/health,/error,/user/login
+  ignoreResources: gif,bmp,png,jpg,js,flash,css,swf,flv,metaget
+
+static:
+  uriPrefix: http://localhost:80
+
+backgroud:
+  serverUrl: http://gateway-service/product/
+
+
+project:
+  queryConfigPath: classpath:queryConfig

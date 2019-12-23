@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consumer-service
+data:
+  application.properties: |-
+    bean.url=http://localhost/test
