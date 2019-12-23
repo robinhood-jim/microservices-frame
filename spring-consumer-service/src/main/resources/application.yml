@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: consumer-service
+  profiles:
+    active: dev
+  cloud:
+    consul:
+      host: 172.16.102.129
+      port: 8500
+      discovery:
+        register: true
+        tags: version=1.0,author=robinjim
+        healthCheckInterval: 5s
+        healthCheckPath: /health
+        service-name: consumer-service
+
+
+server:
+  port: 9090
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    com.baeldung.cloud.openfeign.client: debug
+log:
+  level: INFO
+  home: ./logs
+
+
+static:
+  uriPrefix: http://localhost:80
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+  hystrix:
+    enabled: false

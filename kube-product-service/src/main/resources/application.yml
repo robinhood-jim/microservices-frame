@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: product-service
+  profiles:
+    active: dev
+  cache:
+    cache-names: resourceCache,metaCache,codeSetCache,schemaCache
+    caffeine:
+      spec: maximumSize=1000,expireAfterAccess=600s
+
+server:
+  port: 9088
+core:
+  type: com.zaxxer.hikari.HikariDataSource
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://localhost:3316/frameset?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+  username: root
+  password: root
+
+project:
+  queryConfigPath: classpath:queryConfig
+
+logging:
+  config: classpath:logback-spring.xml
+log:
+  level: ERROR
+  home: ./logs

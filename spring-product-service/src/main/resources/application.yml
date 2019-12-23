@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: product-service
+  profiles:
+    active: dev
+  cloud:
+    consul:
+      host: 127.0.0.1
+      port: 8500
+      discovery:
+        tags: version=1.0,author=robinjim
+        healthCheckInterval: 5s
+        healthCheckPath: /health
+        register: true
+        service-name: product-service
+  redis:
+    host: 127.0.0.1
+    lettuce:
+      pool:
+        max-active: 10
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+
+
+
+server:
+  port: 9088
+core:
+  type: com.zaxxer.hikari.HikariDataSource
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://localhost:3316/frameset?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+  username: root
+  password: root
+
+project:
+  queryConfigPath: classpath:queryConfig
+
+logging:
+  config: classpath:logback-spring.xml
+
+log:
+  level: INFO
+  home: ./logs

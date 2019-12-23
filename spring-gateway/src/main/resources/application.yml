@@ -1,0 +1,84 @@
+spring:
+  messages:
+      basename: i18n/messages
+      encoding: UTF-8
+  application:
+    name: gateway-service
+  profiles:
+    active: dev
+  cloud:
+    consul:
+      host: 172.16.102.129
+      port: 8500
+      discovery:
+        tags: version=1.0,author=robinjim
+        healthCheckPath: /health
+        healthCheckInterval: 5s
+        register: true
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: service_to_user
+          uri: lb://consumer-service
+          predicates:
+            - Path=/system/**
+
+
+        - id: product
+          uri: lb://product-service
+
+          predicates:
+            - Path=/product/**
+          filters:
+            - StripPrefix=1
+            - SaveSession
+
+        - id: oauth2
+          uri: lb://oauth2-service
+          predicates:
+            - Path=/oauth2/**
+          filters:
+            - StripPrefix=1
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    check-template-location: true
+    suffix: .html
+    encoding: UTF-8
+  redis:
+    host: localhost
+    lettuce:
+      pool:
+        max-active: 10
+
+
+server:
+  port: 9092
+
+login:
+  ignoreUrls: /login,/logout,/health,/error,/refreshToken,/getSession,/validateCode
+  ignoreResources: gif,bmp,png,jpg,js,flash,css,swf,flv,metaget
+  oauth2-uri: http://oauth2-service/
+  clientId: webui-client
+  clientSecret: 123456
+  hostname: gatewayserver
+backgroud:
+  serverUrl: http://product-service/
+
+
+
+logging:
+  config: classpath:logback-spring.xml
+
+log:
+  level: INFO
+  home: ./logs
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          strategy: SEMAPHORE

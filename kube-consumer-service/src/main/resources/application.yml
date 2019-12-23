@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: product-service
+  profiles:
+    active: dev
+  cache:
+    cache-names: resourceCache,metaCache,codeSetCache,schemaCache
+    caffeine:
+      spec: maximumSize=1000,expireAfterAccess=600s
+
+server:
+  port: 9088
+
+project:
+  queryConfigPath: classpath:queryConfig
+
+logging:
+  config: classpath:logback-spring.xml
+log:
+  level: ERROR
+  home: ./logs
