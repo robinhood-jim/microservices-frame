@@ -132,7 +132,7 @@ public class LoginContorller {
             if (manager.getCache("accessKey").get(code) != null) {
                 UserParams params = new UserParams(manager.getCache("accessKey").get(code).get().toString().split("\\|"));
                 if(validateAccessToken(exchange,params)) {
-                    Map<String, Object> retMap = RestTemplateUtils.getResultFromRest(exchange.getApplicationContext(), "users/current?access_token={1}", new Object[]{params.getAccessToken()});
+                    Map<String, Object> retMap = RestTemplateUtils.getResultFromSsoRest(exchange.getApplicationContext(), "users/current?access_token={1}", new Object[]{params.getAccessToken()});
                     return Mono.create(sink -> sink.success(retMap));
                 }
             }
@@ -184,7 +184,7 @@ public class LoginContorller {
         boolean validateOk=false;
         try{
             //validate access_token
-            RestTemplateUtils.getResultFromRest(exchange.getApplicationContext(), "users/current?access_token={1}", new Object[]{params.getAccessToken()});
+            RestTemplateUtils.getResultFromSsoRest(exchange.getApplicationContext(), "users/current?access_token={1}", new Object[]{params.getAccessToken()});
             validateOk=true;
         }catch (Exception ex){
 
@@ -195,6 +195,7 @@ public class LoginContorller {
                 Map<String, Object> retMap = RestTemplateUtils.refreshToken(exchange, params.getRefreshToken());
                 manager.getCache("accessKey").put(exchange.getRequest().getQueryParams().getFirst("code"), new UserParams(
                         new String[]{retMap.get("access_token").toString(), params.getRefreshToken(), params.getUserId()}).getRedisValue());
+                params.setAccessToken(retMap.get("access_token").toString());
                 validateOk=true;
             }catch (Exception ex){
 
