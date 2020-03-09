@@ -29,25 +29,16 @@ import javax.sql.DataSource;
 @ComponentScan("com.robin.oauth2")
 public class DbConfig {
     private Logger logger= LoggerFactory.getLogger(getClass());
-    @Value("${core.url}")
-    private String coreurl;
-    @Value("${core.driver-class-name}")
-    private String coredriverClassName;
-    @Value("${core.username}")
-    private String coreuserName;
-    @Value("${core.password}")
-    private String corepassword;
-    @Value("${core.type}")
-    private String coretype;
+
     @Value("${project.queryConfigPath}")
     private String queryConfigPath;
 
     @Bean(name = "dataSource")
-    @Primary
-    @DependsOn("springContextHolder")
+    @ConfigurationProperties(prefix = "frame.datasource")
     public DataSource dataSource(){
         try {
-            return DataSourceBuilder.create().type((Class<? extends DataSource>) Class.forName(coretype)).url(coreurl).driverClassName(coredriverClassName).username(coreuserName).password(corepassword).build();
+            DataSource dataSource=DataSourceBuilder.create().build();
+            return dataSource;
         }catch (Exception ex){
             logger.error("",ex);
         }
@@ -55,13 +46,16 @@ public class DbConfig {
     }
     @Bean(name = "oauthdataSource")
     @Qualifier("oauthdataSource")
+    @Primary
+    @DependsOn("springContextHolder")
     @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource dataSourceOauth(){
-        return DataSourceBuilder.create().type(HikariDataSource.class).build();
+        DataSource dataSource=DataSourceBuilder.create().type(HikariDataSource.class).build();
+        return dataSource;
     }
 
     @Bean
-    protected AuthorizationCodeServices authorizationCodeServices(DataSource dataSource) {
+    protected AuthorizationCodeServices authorizationCodeServices(@Qualifier("oauthdataSource") DataSource dataSource) {
         return new JdbcAuthorizationCodeServices(dataSource);
     }
     @Bean(name="queryFactory")
@@ -87,6 +81,7 @@ public class DbConfig {
         JdbcDao dao=new JdbcDao(dataSource,lobhandler,factory,sqlGen);
         return dao;
     }
+
 
     @Bean(name="springContextHolder")
     @Lazy(false)

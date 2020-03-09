@@ -1,5 +1,7 @@
 package com.robin.oauth2.service;
 
+import com.robin.core.base.util.StringUtils;
+import com.robin.example.model.user.SysUser;
 import com.robin.example.service.system.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,18 +21,28 @@ import java.util.Map;
 public class JdbcUserDetailService implements UserDetailsService {
     @Autowired
     private LoginService loginService;
+
     @Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        Map<String,Object> map= loginService.getUserAndResp(userName);
-        if(map!=null){
+
+        SysUser sysUser=loginService.getUserInfo(userName);
+        if(sysUser!=null){
             List<GrantedAuthority> grants=new ArrayList<>();
-            if(map.containsKey("resps")){
-                String[] respArr=map.get("resps").toString().split(",");
-                for(String resp:respArr){
-                    grants.add(new SimpleGrantedAuthority(resp));
-                }
+            Map<String,Object> resMap=loginService.getUserRights(sysUser.getId());
+            List<String> roles=(List<String>)resMap.get("roles");
+            roles.forEach(f->{
+                grants.add(new SimpleGrantedAuthority("ROLE_"+f));
+            });
+            if(resMap.containsKey("permission")){
+                Map<String,Map<String,Object>> accessResMap=(Map<String,Map<String,Object>>)resMap.get("permission");
+                accessResMap.forEach((k,v)->{
+                    if(v.containsKey("permission") && !StringUtils.isEmpty(v.get("permission")))
+                        grants.add(new SimpleGrantedAuthority(v.get("permission").toString()));
+                });
             }
-            UserDetails user= new User(map.get("accountName").toString(),map.get("password").toString().toLowerCase(),grants);
+            User.UserBuilder builder=User.withUsername(sysUser.getUserAccount()).password(sysUser.getUserPassword().toLowerCase())
+                    .authorities(grants);
+            UserDetails user= builder.build();
             return user;
         }else{
             throw new UsernameNotFoundException("Invalid username and password");

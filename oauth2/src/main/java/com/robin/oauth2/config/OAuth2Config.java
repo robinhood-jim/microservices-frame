@@ -1,12 +1,14 @@
 package com.robin.oauth2.config;
 
+
 import com.robin.core.base.spring.SpringContextHolder;
+import com.robin.oauth2.enhacer.CustomTokenEnhancer;
 import com.robin.oauth2.service.JdbcUserDetailService;
-import com.robin.oauth2.tokenstore.RedisTokenStorePatched;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,7 +19,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -38,12 +42,15 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
     private JdbcUserDetailService userDetailService;
     @Autowired
     private AuthenticationManager authenticationManager;
-
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private Environment env;
 
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore()).userDetailsService(userDetailService);
+        endpoints.authenticationManager(authenticationManager).tokenStore(tokenStore()).tokenEnhancer(tokenEnhancer()).userDetailsService(userDetailService);
     }
 
     @Override
@@ -65,19 +72,16 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        DataSource source= SpringContextHolder.getBean("oauthdataSource",DataSource.class);
-        clients.jdbc(source);
-/*        .withClient("browser")
-                .authorizedGrantTypes("refresh_token", "password")
-                .scopes("ui").and()
-                .withClient("webui-client")
-                .secret(encoder.encode("123456"))
-                .authorizedGrantTypes("authorization_code", "refresh_token",
-                        "password").scopes("all");*/
+        //DataSource source= SpringContextHolder.getBean("oauthdataSource",DataSource.class);
+        clients.jdbc(dataSource);
     }
-    @Bean
+    /*@Bean
     public TokenStore tokenStore() {
         return new RedisTokenStorePatched(redisConnectionFactory);
+    }*/
+    @Bean
+    public TokenStore tokenStore(){
+        return new JdbcTokenStore(dataSource);
     }
 
     /*@Bean
@@ -91,7 +95,20 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
     public DefaultTokenServices tokenServices() {
         DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
         defaultTokenServices.setTokenStore(tokenStore());
+        Integer tokenValidateHour=24*7;
+        if(env.containsProperty("token.validateHour")){
+            tokenValidateHour=Integer.valueOf(env.getProperty("token.validateHour"));
+        }
+        defaultTokenServices.setAccessTokenValiditySeconds(60*60*tokenValidateHour);
+        defaultTokenServices.setRefreshTokenValiditySeconds(60*60*tokenValidateHour);
+        //final TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        //tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer()));
+        defaultTokenServices.setTokenEnhancer(tokenEnhancer());
         return defaultTokenServices;
+    }
+    @Bean
+    public TokenEnhancer tokenEnhancer(){
+        return new CustomTokenEnhancer();
     }
 
 

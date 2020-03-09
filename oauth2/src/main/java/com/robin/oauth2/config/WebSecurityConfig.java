@@ -1,11 +1,13 @@
 package com.robin.oauth2.config;
 
+import com.robin.oauth2.comm.OauthConstant;
 import com.robin.oauth2.service.JdbcUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,9 +21,10 @@ import org.springframework.util.DigestUtils;
 @EnableWebSecurity
 @Order(1)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Value("${login.ignoreUrls}")
-    private String ignoreUrls;
 
+    private String ignoreUrls;
+    @Autowired
+    private Environment environment;
     @Autowired
     private JdbcUserDetailService jdbcUserDetailService;
 
@@ -55,6 +58,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        if(environment.containsProperty("resaccess.ignoreUrls")){
+            ignoreUrls=environment.getProperty("resaccess.ignoreUrls");
+        }else{
+            ignoreUrls= OauthConstant.DEFAULT_IGONOREURLS;
+        }
         String[] ignoreUrlArr=ignoreUrls.split(",");
         http.requestMatchers().antMatchers("/oauth/**").and().authorizeRequests().antMatchers(ignoreUrlArr).permitAll().anyRequest().authenticated().and().csrf();
     }
