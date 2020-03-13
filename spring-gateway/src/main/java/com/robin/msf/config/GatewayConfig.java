@@ -15,6 +15,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -75,5 +78,18 @@ public class GatewayConfig {
     public AuthorizeFilter filter(){
         return new AuthorizeFilter();
     }
+    @Bean
+    public TokenStore tokenStore(){
+        return new JwtTokenStore(accessTokenConverter());
+    }
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        final JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey("123456");
+        // final KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource("mytest.jks"), "mypass".toCharArray());
+        // converter.setKeyPair(keyStoreKeyFactory.getKeyPair("mytest"));
+        return converter;
+    }
+
 
 }

@@ -5,6 +5,11 @@ import com.robin.core.base.spring.SpringContextHolder;
 import com.robin.core.query.util.QueryFactory;
 import com.robin.core.sql.util.BaseSqlGen;
 import com.robin.core.sql.util.MysqlSqlGen;
+import com.robin.example.service.system.LoginService;
+import com.robin.example.service.system.SysResourceService;
+import com.robin.example.service.system.SysUserOrgService;
+import com.robin.example.service.user.SysUserResponsiblityService;
+import com.robin.example.service.user.SysUserService;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +31,6 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableResourceServer
-@ComponentScan("com.robin.oauth2")
 public class DbConfig {
     private Logger logger= LoggerFactory.getLogger(getClass());
 
@@ -54,10 +58,10 @@ public class DbConfig {
         return dataSource;
     }
 
-    @Bean
+   /* @Bean
     protected AuthorizationCodeServices authorizationCodeServices(@Qualifier("oauthdataSource") DataSource dataSource) {
         return new JdbcAuthorizationCodeServices(dataSource);
-    }
+    }*/
     @Bean(name="queryFactory")
     @Qualifier("queryFactory")
     public QueryFactory getQueryFactory(){

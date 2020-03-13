@@ -71,6 +71,11 @@ backgroud:
 
 logging:
   config: classpath:logback-spring.xml
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: debug
 
 log:
   level: INFO

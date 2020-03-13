@@ -2,9 +2,7 @@ package com.robin.oauth2.config;
 
 import com.robin.oauth2.comm.OauthConstant;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -31,12 +29,31 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             ignoreUrls= OauthConstant.DEFAULT_IGONOREURLS;
         }
         String[] ignoreUrlArr=ignoreUrls.split(",");
-        http.authorizeRequests().antMatchers(ignoreUrlArr).permitAll().and().authorizeRequests().anyRequest().authenticated().and().logout().and().cors().and().csrf().disable();
+        http.authorizeRequests().antMatchers("/auth/**","/health").permitAll().and().formLogin().permitAll();
+        /*http.authorizeRequests().antMatchers("/login","/api/**","/oauth/**").permitAll()
+                .antMatchers("/health","/oauth/authorize","/oauth/token","/oauth/**","/login/**","/user/**","/logout/**","/oauth/token/revokeById/**").permitAll()
+                //.antMatchers(ignoreUrlArr).permitAll()
+                .anyRequest().authenticated()
+                .and().formLogin()
+                //.loginPage("/login")
+                .permitAll()
+                .and().cors().and().csrf().disable();*/
+        /*http.requestMatchers()
+                //.antMatchers("/oauth/**","/login")
+                .antMatchers(ignoreUrlArr).and().authorizeRequests()
+                .anyRequest().authenticated()
+                .and().formLogin()
+                //.loginPage("/login")
+                .permitAll()
+                .and().csrf().disable();*/
+
     }
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-        resources.resourceId("oauth-service");
+        resources.resourceId("oauth2-authserver");
         resources.tokenStore(tokenStore);
     }
+
+
 }

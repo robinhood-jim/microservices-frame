@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 
-@Service
 public class JdbcUserDetailService implements UserDetailsService {
     @Autowired
     private LoginService loginService;

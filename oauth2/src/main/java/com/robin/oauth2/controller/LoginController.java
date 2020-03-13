@@ -4,6 +4,7 @@ package com.robin.oauth2.controller;
 import com.robin.core.web.util.Session;
 import com.robin.example.service.system.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -24,22 +25,24 @@ import java.util.Map;
 @Controller
 public class LoginController {
     @Autowired
+    private ResourceBundleMessageSource messageSource;
+    @Autowired
     private LoginService loginService;
     @Autowired
     private TokenStore tokenStore;
-
-    @GetMapping("/login")
-    @PreAuthorize("premitAll")
-    String login(){
-        return "/login";
+    @PreAuthorize("permitAll()")
+    @RequestMapping("/login")
+    public String login(){
+        return "oauth_login";
     }
-    @RequestMapping("/health")
+    @GetMapping("/health")
     @ResponseBody
-    @PreAuthorize("premitAll")
-    String health(){
+    @PreAuthorize("permitAll()")
+    public String health(){
         return "OK";
     }
     @RequestMapping("/sso/getuserright")
+    @PreAuthorize("permitAll()")
     @ResponseBody
     public Map<String,Object> ssoGetUser(HttpServletRequest request,Principal principal){
         Map<String, Object> map = new HashMap();

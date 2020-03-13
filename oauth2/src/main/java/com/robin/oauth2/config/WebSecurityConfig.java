@@ -18,15 +18,14 @@ import org.springframework.util.DigestUtils;
 
 
 @Configuration
-@EnableWebSecurity
-@Order(1)
+//@EnableWebSecurity
+//@Order(1)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private String ignoreUrls;
     @Autowired
     private Environment environment;
-    @Autowired
-    private JdbcUserDetailService jdbcUserDetailService;
+
 
     /*@Override
     public void configure(WebSecurity web) throws Exception {
@@ -53,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(jdbcUserDetailService).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(getJdbcUserDetailService()).passwordEncoder(passwordEncoder());
     }
 
     @Override
@@ -64,12 +63,33 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             ignoreUrls= OauthConstant.DEFAULT_IGONOREURLS;
         }
         String[] ignoreUrlArr=ignoreUrls.split(",");
-        http.requestMatchers().antMatchers("/oauth/**").and().authorizeRequests().antMatchers(ignoreUrlArr).permitAll().anyRequest().authenticated().and().csrf();
+        http.authorizeRequests()
+                //.antMatchers("/login","/api/**","/oauth/**").permitAll()
+                .antMatchers("/health","/login","oauth/**","/oauth/authorize","/oauth/token","/oauth/**","/login/**","/user/**","/logout/**","/oauth/token/revokeById/**").permitAll()
+                //.antMatchers(ignoreUrlArr).permitAll()
+                .anyRequest().authenticated()
+                .and().formLogin()
+                //.loginPage("/login")
+                .permitAll()
+                .and().cors().and().csrf().disable();
+        /*http.requestMatchers()
+                //.antMatchers("/oauth/**","/login","/resources/**")
+                .antMatchers(ignoreUrlArr).and().authorizeRequests()
+                .anyRequest().authenticated()
+                .and().formLogin()
+                //.loginPage("/login")
+                .permitAll()
+                .and().csrf().disable();*/
+        //http.requestMatchers().antMatchers("/oauth/**").and().authorizeRequests().antMatchers(ignoreUrlArr).permitAll().anyRequest().authenticated().and().csrf();
     }
     @Override
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception{
-        return super.authenticationManager();
+        return super.authenticationManagerBean();
+    }
+    @Bean
+    public JdbcUserDetailService getJdbcUserDetailService(){
+        return new JdbcUserDetailService();
     }
 
 
