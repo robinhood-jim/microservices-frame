@@ -4,11 +4,11 @@
     <title th:text="#{title.loginPage}"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <link rel="stylesheet" type="text/css" th:href="@{component/dhtmlxSuite/codebase/dhtmlx.css}"/>
-    <link rel="stylesheet" type="text/css" th:href="@{component/dhtmlxSuite/skins/terrace/dhtmlx.css}"/>
-    <script th:src="@{component/dhtmlxSuite/codebase/dhtmlx.js}"></script>
-    <script th:src="@{resources/js/jquery.js}"></script>
-    <script th:src="@{resources/js/md5.min.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{resources/dhtmlxSuite/codebase/dhtmlx.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{resources/dhtmlxSuite/skins/terrace/dhtmlx.css}"/>
+    <script type="javascript" th:src="@{resources/dhtmlxSuite/codebase/dhtmlx.js}"></script>
+    <script type="javascript" th:src="@{resources/js/jquery.js}"></script>
+    <script type="javascript" th:src="@{resources/js/md5.min.js}"></script>
     <style type="text/css">
         table {
             border-collapse: collapse;
@@ -57,7 +57,7 @@
     var msg = "";
     var ctx = "[[${#httpServletRequest.getContextPath()}]]";
     var requestctx = "[[#{contextpath}]]";
-    var dhxWins, w1, myForm, mySlider;
+    var dhxWins, w1, mySlider;
     dhxWins = new dhtmlXWindows();
 
     function openMsgDialog(title, msg, width, height, func) {
@@ -81,31 +81,49 @@
         return bValid;
     }
 
-    function goValidate(myForm) {
+    function goValidate() {
         var sliderval = mySlider.getValue();
         var uName = document.getElementById("userName");
-        var password = document.getElementById("password");
+        var password = document.getElementById("userpassword");
         if (checkInput(uName, password)) {
             if (sliderval != 99) {
                 openMsgDialog("[[#{login.failed}]]", "[[#{login.dragScrollBar}]]", 300, 200);
                 return false;
             }
-            login(myForm);
+            login();
         }
         else {
             openMsgDialog("[[#{login.failed}]]", "[[#{message.errorMsg}]]" + msg, 300, 200);
         }
     }
 
-    function login(myForm) {
-        $.ajax({
-                type:"post",
-                "url":ctx + '/login',
-                xhrFields: {withCredentials: true},
-                data:{username: $("#userName").val(), password: md5($("#password").val())},
-                success:function(retval) {
-                alert(retval);
-            }});
+    function login() {
+        /*$.post(ctx + '/login',
+            {username: $("#userName").val(), password: $("#password").val()},
+            function(retval) {
+                var retjson = eval(retval);
+                if (retjson.success == true) {
+                    if (retjson.selectOrg == true) {
+                        selectOrg(retjson.userId);
+                    } else
+                        window.location.href = ctx + '/index';
+                } else {
+                    openMsgDialog("[[#{login.failed}]]", "[[#{message.errorMsg}]]" + retjson.message, 300, 200);
+                }
+            });*/
+        var uName = $("#userName").val();
+        var password = $("#userpassword").val();
+        console.log(uName+" "+password);
+        var my_input = $('<input type="hidden" name="username" />');
+        my_input.attr('value', uName);
+        $("#frm").append(my_input);
+        var my_input1 = $('<input type="hidden" name="password" />');
+        my_input1.attr('value', password);
+        $("#frm").append(my_input1);
+
+        console.log(document.forms.length);
+        console.log(document.forms[0].elements);
+        $("#frm").submit();
     }
 
     function showmsg() {
@@ -153,7 +171,7 @@
                             type: "select",
                             label: "[[#{sysUser.Org}]]",
                             name: "orgId",
-                            connector: requestctx + "system/user/listorg",
+                            connector: ctx + "system/user/listorg",
                             NotNull: true
                         }
                     ]
@@ -206,6 +224,8 @@
 
 
 </script>
+<form id="frm" th:action="@{login}" method="post">
+</form>
 <div id="winVP" class=" dhxwins_vp_material" style="text-align: left !important;">
     <div class="dhxwin_active"
          style="z-index: 105; left: 315px; top: 156px; width: 700px; height: 300px;">
@@ -214,7 +234,7 @@
             <div class="dhxwin_text"
                  style="padding-left: 19px; padding-right: 42px;">
                 <div class="dhxwin_text_inside">
-                    <spring:message code="login.LoginSys"/>
+                    [[#{login.LoginSys}]]
                 </div>
             </div>
             <div class="dhxwin_btns"></div>
@@ -228,6 +248,7 @@
                 <div
                         style="width: 100%; height: 100%; position: relative; overflow: auto; font-size: 14px;"
                         class="dhxform_obj_material">
+
                     <div class="dhxform_base">
                         <div style="padding-left: 10px ! important;"
                              class="dhxform_item_label_left">
@@ -267,7 +288,7 @@
                                     </div>
                                     <div class="dhxform_control">
                                         <input type="password" class="dhxform_textarea" value="123456"
-                                               id="password" style="width: 116px;">
+                                               id="userpassword" style="width: 116px;">
                                     </div>
                                 </div>
                             </div>
@@ -307,6 +328,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div style="padding-left: 10px ! important;"
                          class="dhxform_item_label_left">
                         <div class="dhxform_txt_label2" style="width: 130px;"></div>

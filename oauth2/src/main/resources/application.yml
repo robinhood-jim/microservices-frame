@@ -1,16 +1,17 @@
 spring:
   datasource:
     hikari:
-        jdbc-url: jdbc:mysql://localhost:3316/oauth2?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+        jdbc-url: jdbc:mysql://localhost:3306/oauth2?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&autoReconnect=true
         driver-class-name: com.mysql.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
-    jdbc-url: jdbc:mysql://localhost:3316/oauth2?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+    jdbc-url: jdbc:mysql://localhost:3306/oauth2?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&autoReconnect=true
     username: root
     password: root
+    driver-class-name: com.mysql.jdbc.Driver
 
 
   application:
-    name: oauth2-service
+    name: oauth2-authserver
   profiles:
     active: dev
   cloud:
@@ -20,7 +21,7 @@ spring:
       discovery:
         register: true
         tags: version=1.0,author=robinjim
-        healthCheckInterval: 5s
+        healthCheckInterval: 50s
         healthCheckPath: /health
         service-name: oauth2-service
 
@@ -29,31 +30,31 @@ spring:
     lettuce:
       pool:
         max-active: 10
+  thymeleaf:
+    prefix: classpath:/templates/
+    check-template-location: true
+    suffix: .html
+    encoding: UTF-8
 
-  session:
-    store-type: redis
   messages:
     basename: i18n/messages
 
 
 
-core:
-  type: com.zaxxer.hikari.HikariDataSource
-  driver-class-name: com.mysql.jdbc.Driver
-  url: jdbc:mysql://localhost:3316/frameset?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
-  username: root
-  password: root
 
 server:
   port: 9098
   servlet:
     session:
       timeout: "PT10M"
+    context-path: /
 
 logging:
   config: classpath:logback-spring.xml
   level:
-    com.baeldung.cloud.openfeign.client: debug
+    org:
+      springframework:
+        security: debug
 log:
   level: DEBUG
   home: ./logs

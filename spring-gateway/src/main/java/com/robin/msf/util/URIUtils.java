@@ -1,6 +1,5 @@
 package com.robin.msf.util;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 
 
@@ -22,14 +21,7 @@ public class URIUtils {
         }
         return contentPath;
     }
-    public static String getRequestPath(HttpServletRequest request) {
-        String contentPath = request.getRequestURI();
-        int pos = contentPath.indexOf("?");
-        if (pos != -1) {
-            contentPath = contentPath.substring(0, pos);
-        }
-        return contentPath;
-    }
+
     public static String getRequestRelativePathOrSuffix(String requestPath,String contentPath){
         if (!"/".equals(requestPath)) {
             int pos = contentPath.indexOf(contentPath);

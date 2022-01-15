@@ -2,12 +2,14 @@ package com.robin.msf.contorller.system;
 
 import com.robin.core.base.exception.ServiceException;
 import com.robin.core.convert.util.ConvertUtil;
-import com.robin.core.web.controller.BaseCrudDhtmlxController;
+import com.robin.core.query.util.PageQuery;
+import com.robin.core.web.controller.AbstractCrudController;
 import com.robin.example.model.system.SysResource;
 import com.robin.example.service.system.SysResourceService;
 import com.robin.example.service.system.SysRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -20,15 +22,14 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/system/menu")
-public class SysResourceContorller extends BaseCrudDhtmlxController<SysResource, Long, SysResourceService> {
+public class SysResourceContorller extends AbstractCrudController<SysResource, Long, SysResourceService> {
 
     @Autowired
     private SysRoleService sysRoleService;
 
     @RequestMapping("/list")
     @ResponseBody
-    public Map<String, Object> list(HttpServletRequest request,
-                                    HttpServletResponse response) {
+    public Map<String, Object> list() {
         List<Map<String, Object>> list = service.queryBySql("select id,res_name as name,url,pid from t_sys_resource_info where RES_TYPE='1' ORDER BY RES_CODE,PID,SEQ_NO");
         List<Map<String, Object>> retList = new ArrayList<Map<String, Object>>();
         Map<String, Object> rmap = new HashMap<String, Object>();
@@ -105,12 +106,10 @@ public class SysResourceContorller extends BaseCrudDhtmlxController<SysResource,
         return retMap;
     }
 
-    @RequestMapping("/edit")
+    @RequestMapping("/edit/{id}")
     @ResponseBody
-    public Map<String, Object> queryUser(HttpServletRequest request,
-                                         HttpServletResponse response) {
-        String id = request.getParameter("id");
-        return doEdit(request, response, Long.valueOf(id));
+    public Map<String, Object> queryUser(@PathVariable Long id) {
+        return doEdit(id);
     }
 
     @RequestMapping("/update")
@@ -139,7 +138,7 @@ public class SysResourceContorller extends BaseCrudDhtmlxController<SysResource,
 
     @RequestMapping("/assignrole")
     @ResponseBody
-    public Map<String, Object> assignRole(HttpServletRequest request, HttpServletResponse response) {
+    public Map<String, Object> assignRole(HttpServletRequest request) {
         String[] ids = request.getParameter("selRoleIds").split(",");
         Map<String, Object> retmap = new HashMap<String, Object>();
         try {
@@ -151,5 +150,10 @@ public class SysResourceContorller extends BaseCrudDhtmlxController<SysResource,
             retmap.put("success", "false");
         }
         return retmap;
+    }
+
+    @Override
+    protected String wrapQuery(HttpServletRequest httpServletRequest, PageQuery pageQuery) {
+        return null;
     }
 }

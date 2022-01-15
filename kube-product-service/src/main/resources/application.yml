@@ -13,7 +13,7 @@ server:
 core:
   type: com.zaxxer.hikari.HikariDataSource
   driver-class-name: com.mysql.jdbc.Driver
-  url: jdbc:mysql://localhost:3316/frameset?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+  url: jdbc:mysql://localhost:3306/frameset?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true
   username: root
   password: root
 

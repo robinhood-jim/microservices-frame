@@ -2,6 +2,7 @@ package com.robin.msf.config;
 
 import com.robin.core.base.dao.JdbcDao;
 import com.robin.core.base.spring.SpringContextHolder;
+import com.robin.core.base.util.MessageUtils;
 import com.robin.core.query.util.QueryFactory;
 import com.robin.core.sql.util.BaseSqlGen;
 import com.robin.core.sql.util.MysqlSqlGen;
@@ -70,7 +71,7 @@ public class DbConfig {
     @Bean(name = "sqlGen")
     @Qualifier("sqlGen")
     public BaseSqlGen getSqlGen(){
-        return new MysqlSqlGen();
+        return MysqlSqlGen.getInstance();
     }
 
     @Bean(name="springContextHolder")
@@ -88,6 +89,11 @@ public class DbConfig {
         return dao;
     }
     @Bean
+    public MessageUtils getMessageUtils(){
+        return new MessageUtils();
+    }
+    @Bean
+    @Primary
     public ResourceBundleMessageSource getMessageSource(){
         ResourceBundleMessageSource messageSource=new ResourceBundleMessageSource();
         messageSource.setBasename("messages");

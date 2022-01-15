@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableDiscoveryClient
 @EnableCaching
 @ComponentScan("com.robin")
-
 public class ApplicationProduct {
     public static  void main(String[] args) throws Exception{
         try {
@@ -22,4 +21,5 @@ public class ApplicationProduct {
             ex.printStackTrace();
         }
     }
+
 }

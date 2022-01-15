@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.reactive.result.view.Rendering;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 
@@ -31,7 +31,7 @@ public class LoginContorller {
     protected CacheManager manager;
 
     @GetMapping("/login")
-    String loginPage(ServerWebExchange exchange, final Model model) {
+    Rendering loginPage(ServerWebExchange exchange, final Model model) {
         if (exchange.getRequest().getQueryParams().containsKey("redirect_url")) {
             model.addAttribute("redirectUrl", exchange.getRequest().getQueryParams().getFirst("redirect_url"));
         }
@@ -43,12 +43,12 @@ public class LoginContorller {
                 if(validateAccessToken(exchange,params)) {
                     Map<String, Object> retMap = RestTemplateUtils.getResultFromRest(exchange.getApplicationContext(), "getSession?userId={1}&orgId={2}", new Object[]{params.getUserId(), ""});
                     if (retMap.get("success").equals(true)) {
-                        return "redirect:" + getMainUrl(exchange.getRequest().getQueryParams().getFirst("redirect_url"), "index");
+                        return Rendering.redirectTo(getMainUrl(exchange.getRequest().getQueryParams().getFirst("redirect_url"), "index")).build();
                     }
                 }
             }
         }
-        return "/login";
+        return Rendering.view("login").build();
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

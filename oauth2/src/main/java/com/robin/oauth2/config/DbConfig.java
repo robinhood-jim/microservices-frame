@@ -5,6 +5,11 @@ import com.robin.core.base.spring.SpringContextHolder;
 import com.robin.core.query.util.QueryFactory;
 import com.robin.core.sql.util.BaseSqlGen;
 import com.robin.core.sql.util.MysqlSqlGen;
+import com.robin.example.service.system.LoginService;
+import com.robin.example.service.system.SysResourceService;
+import com.robin.example.service.system.SysUserOrgService;
+import com.robin.example.service.user.SysUserResponsiblityService;
+import com.robin.example.service.user.SysUserService;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,28 +31,18 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableResourceServer
-@ComponentScan("com.robin.oauth2")
 public class DbConfig {
     private Logger logger= LoggerFactory.getLogger(getClass());
-    @Value("${core.url}")
-    private String coreurl;
-    @Value("${core.driver-class-name}")
-    private String coredriverClassName;
-    @Value("${core.username}")
-    private String coreuserName;
-    @Value("${core.password}")
-    private String corepassword;
-    @Value("${core.type}")
-    private String coretype;
+
     @Value("${project.queryConfigPath}")
     private String queryConfigPath;
 
     @Bean(name = "dataSource")
-    @Primary
-    @DependsOn("springContextHolder")
+    @ConfigurationProperties(prefix = "frame.datasource")
     public DataSource dataSource(){
         try {
-            return DataSourceBuilder.create().type((Class<? extends DataSource>) Class.forName(coretype)).url(coreurl).driverClassName(coredriverClassName).username(coreuserName).password(corepassword).build();
+            DataSource dataSource=DataSourceBuilder.create().build();
+            return dataSource;
         }catch (Exception ex){
             logger.error("",ex);
         }
@@ -55,15 +50,18 @@ public class DbConfig {
     }
     @Bean(name = "oauthdataSource")
     @Qualifier("oauthdataSource")
+    @Primary
+    @DependsOn("springContextHolder")
     @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource dataSourceOauth(){
-        return DataSourceBuilder.create().type(HikariDataSource.class).build();
+        DataSource dataSource=DataSourceBuilder.create().type(HikariDataSource.class).build();
+        return dataSource;
     }
 
-    @Bean
-    protected AuthorizationCodeServices authorizationCodeServices(DataSource dataSource) {
+   /* @Bean
+    protected AuthorizationCodeServices authorizationCodeServices(@Qualifier("oauthdataSource") DataSource dataSource) {
         return new JdbcAuthorizationCodeServices(dataSource);
-    }
+    }*/
     @Bean(name="queryFactory")
     @Qualifier("queryFactory")
     public QueryFactory getQueryFactory(){
@@ -80,13 +78,14 @@ public class DbConfig {
     @Bean(name = "sqlGen")
     @Qualifier("sqlGen")
     public BaseSqlGen getSqlGen(){
-        return new MysqlSqlGen();
+        return MysqlSqlGen.getInstance();
     }
     @Bean(name="jdbcDao")
     public JdbcDao getJdbcDao(@Qualifier("dataSource") DataSource dataSource, @Qualifier("sqlGen") BaseSqlGen sqlGen, @Qualifier("queryFactory") QueryFactory factory, @Qualifier("lobHandler") LobHandler lobhandler){
         JdbcDao dao=new JdbcDao(dataSource,lobhandler,factory,sqlGen);
         return dao;
     }
+
 
     @Bean(name="springContextHolder")
     @Lazy(false)
