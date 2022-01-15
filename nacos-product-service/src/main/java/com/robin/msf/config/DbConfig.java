@@ -5,7 +5,6 @@ import com.robin.core.base.spring.SpringContextHolder;
 import com.robin.core.query.util.QueryFactory;
 import com.robin.core.sql.util.BaseSqlGen;
 import com.robin.core.sql.util.MysqlSqlGen;
-import com.robin.core.web.interceptor.RestRequestLimitInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -70,7 +69,7 @@ public class DbConfig {
     @Bean(name = "sqlGen")
     @Qualifier("sqlGen")
     public BaseSqlGen getSqlGen(){
-        return new MysqlSqlGen();
+        return MysqlSqlGen.getInstance();
     }
 
     @Bean(name="springContextHolder")
@@ -114,14 +113,14 @@ public class DbConfig {
                     RestTemplate restTemplate = (RestTemplate) bean;
                     List<ClientHttpRequestInterceptor> interceptors =
                             new ArrayList<>(restTemplate.getInterceptors());
-                    interceptors.add(0, getIntercept());
+                    //interceptors.add(0, getIntercept());
                     restTemplate.setInterceptors(interceptors);
                 }
                 return bean;
             }
-            ClientHttpRequestInterceptor getIntercept(){
+            /*ClientHttpRequestInterceptor getIntercept(){
                 return new RestRequestLimitInterceptor();
-            }
+            }*/
         };
     }
 

@@ -53,6 +53,7 @@ public class AuthorizeFilter implements GlobalFilter, Ordered {
             if (request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                 String tokenValue = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
                 if (tokenValue!=null && !StringUtils.isEmpty(tokenValue)) {
+                    log.info("get token= {}",tokenValue);
                     //jwt decode every request must have valid token
                     OAuth2AccessToken auth2AccessToken=tokenStore.readAccessToken(getToken(tokenValue));
                     if(auth2AccessToken!=null)

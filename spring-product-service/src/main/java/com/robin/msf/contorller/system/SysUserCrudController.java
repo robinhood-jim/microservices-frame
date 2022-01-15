@@ -22,8 +22,7 @@ import com.robin.core.base.util.Const;
 import com.robin.core.base.util.StringUtils;
 import com.robin.core.collection.util.CollectionBaseConvert;
 import com.robin.core.query.util.PageQuery;
-import com.robin.core.web.controller.BaseCrudDhtmlxController;
-import com.robin.core.web.util.Session;
+import com.robin.core.web.controller.AbstractCrudDhtmlxController;
 import com.robin.example.model.system.SysOrg;
 import com.robin.example.model.system.SysResource;
 import com.robin.example.model.user.SysUser;
@@ -33,7 +32,9 @@ import com.robin.example.service.user.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -43,7 +44,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/system/user")
-public class SysUserCrudController extends BaseCrudDhtmlxController<SysUser, Long, SysUserService> {
+public class SysUserCrudController extends AbstractCrudDhtmlxController<SysUser, Long, SysUserService> {
     @Autowired
     private SysOrgService sysOrgService;
     @Autowired
@@ -65,7 +66,7 @@ public class SysUserCrudController extends BaseCrudDhtmlxController<SysUser, Lon
             orgIds = sysOrgService.getSubIdByParentOrgId(Long.valueOf(request.getParameter("orgId")));
         }
         query.getParameters().put("queryCondition", wrapQuery(request, orgIds));
-        doQuery(request, response, query);
+        doQuery(request,null, query);
 
         List<SysOrg> orgList = sysOrgService.queryByField("orgStatus", BaseObject.OPER_EQ, Const.VALID);
         setCode("ORG", orgList, "orgName", "id");
@@ -75,37 +76,36 @@ public class SysUserCrudController extends BaseCrudDhtmlxController<SysUser, Lon
         return wrapDhtmlxGridOutput(query);
     }
 
-    @RequestMapping("/edit")
+    @RequestMapping("/edit/{id}")
     @ResponseBody
-    public Map<String, Object> editUser(HttpServletRequest request,
-                                        HttpServletResponse response) {
-        String id = request.getParameter("id");
-        return doEdit(request, response, Long.valueOf(id));
+    public Map<String, Object> editUser(@PathVariable Long id) {
+        return doEdit(id);
     }
 
     @RequestMapping("/save")
     @ResponseBody
-    public Map<String, Object> saveUser(HttpServletRequest request,
-                                        HttpServletResponse response) {
+    public Map<String, Object> saveUser(@RequestBody Map<String,String> paramMap) {
 
         //check userAccount unique
-        List<SysUser> list = this.service.queryByField("userAccount", BaseObject.OPER_EQ, request.getParameter("userAccount"));
+        List<SysUser> list = this.service.queryByField("userAccount", BaseObject.OPER_EQ, paramMap.get("userAccount"));
         if (!list.isEmpty()) {
             return wrapError(new WebException(messageSource.getMessage("message.userNameExists", null, Locale.getDefault())));
         } else {
-            return doSave(request, response);
+            return doSave(paramMap);
         }
     }
 
     @RequestMapping("/update")
     @ResponseBody
-    public Map<String, Object> updateUser(HttpServletRequest request,
-                                          HttpServletResponse response) {
-        Long id = Long.valueOf(request.getParameter("id"));
+    public Map<String, Object> updateUser(@RequestBody Map<String,String> paramMap) {
+        Assert.notNull(paramMap,"");
+        Assert.notNull(paramMap.get("userAccount"),"");
+        Assert.notNull(paramMap.get("id"),"");
+        Long id=Long.valueOf(paramMap.get("id"));
         //check userAccount unique
-        List<SysUser> list = this.service.queryByField("userAccount", BaseObject.OPER_EQ, request.getParameter("userAccount"));
+        List<SysUser> list = this.service.queryByField("userAccount", BaseObject.OPER_EQ, paramMap.get("userAccount"));
         if ((list.size() == 1 && id.equals(list.get(0).getId())) || list.isEmpty()) {
-            return doUpdate(request, response, id);
+            return doUpdate(paramMap, id);
         } else {
             return wrapError(new WebException(messageSource.getMessage("message.userNameExists", null, Locale.getDefault())));
         }
@@ -114,7 +114,7 @@ public class SysUserCrudController extends BaseCrudDhtmlxController<SysUser, Lon
 
     @RequestMapping("/listorg/{userId}")
     @ResponseBody
-    public Map<String, Object> listUserOrg(HttpServletRequest request, @PathVariable Long userId) {
+    public Map<String, Object> listUserOrg(@PathVariable Long userId) {
         Map<String, Object> retMap = new HashMap<>();
         PageQuery query = new PageQuery();
         query.setPageSize(0);
@@ -356,4 +356,8 @@ public class SysUserCrudController extends BaseCrudDhtmlxController<SysUser, Lon
         return retMaps;
     }
 
+    @Override
+    protected String wrapQuery(HttpServletRequest httpServletRequest, PageQuery pageQuery) {
+        return null;
+    }
 }

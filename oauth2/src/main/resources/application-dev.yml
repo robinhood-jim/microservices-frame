@@ -1,7 +1,7 @@
 frame:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    jdbc-url: jdbc:mysql://localhost:3316/frameset?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
+    jdbc-url: jdbc:mysql://localhost:3306/frameset?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true
     username: root
     password: root
     driver-class-name: com.mysql.jdbc.Driver

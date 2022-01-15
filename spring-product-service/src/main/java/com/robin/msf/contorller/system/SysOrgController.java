@@ -1,12 +1,9 @@
 package com.robin.msf.contorller.system;
 
-import com.google.gson.Gson;
 import com.robin.core.base.model.BaseObject;
-import com.robin.core.base.util.Const;
 import com.robin.core.convert.util.ConvertUtil;
 import com.robin.core.query.util.PageQuery;
-import com.robin.core.web.controller.BaseCrudDhtmlxController;
-import com.robin.core.web.util.Session;
+import com.robin.core.web.controller.AbstractCrudController;
 import com.robin.core.web.util.WebConstant;
 import com.robin.example.model.system.SysOrg;
 import com.robin.example.service.system.SysOrgService;
@@ -14,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +21,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/system/org")
-public class SysOrgController extends BaseCrudDhtmlxController<SysOrg, Long, SysOrgService> {
+public class SysOrgController extends AbstractCrudController<SysOrg, Long, SysOrgService> {
     @Autowired
     private ResourceBundleMessageSource messageSource;
 
@@ -34,14 +31,13 @@ public class SysOrgController extends BaseCrudDhtmlxController<SysOrg, Long, Sys
     @ResponseBody
     public Map<String, Object> editOrg(HttpServletRequest request,
                                        HttpServletResponse response, @PathVariable Long id) {
-        return doEdit(request, response, id);
+        return doEdit(id);
     }
 
     @RequestMapping("/update")
     @ResponseBody
-    public Map<String, Object> updateOrg(HttpServletRequest request,
-                                         HttpServletResponse response) {
-        return doUpdate(request, response, Long.valueOf(request.getParameter("id")));
+    public Map<String, Object> updateOrg(@RequestBody Map<String,String> paramMap) {
+        return doUpdate(paramMap, Long.valueOf(paramMap.get("id")));
     }
 
     @RequestMapping("/save")
@@ -70,7 +66,7 @@ public class SysOrgController extends BaseCrudDhtmlxController<SysOrg, Long, Sys
             } else {
                 vo.setTreeLevel(1);
             }
-            return doSave(request, response, vo);
+            return doSave(vo);
         } catch (Exception ex) {
             wrapFailed(retMap, ex);
         }
@@ -209,4 +205,8 @@ public class SysOrgController extends BaseCrudDhtmlxController<SysOrg, Long, Sys
         return map;
     }
 
+    @Override
+    protected String wrapQuery(HttpServletRequest httpServletRequest, PageQuery pageQuery) {
+        return null;
+    }
 }

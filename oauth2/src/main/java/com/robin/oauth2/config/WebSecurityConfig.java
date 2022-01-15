@@ -1,11 +1,13 @@
 package com.robin.oauth2.config;
 
+import com.robin.core.base.spring.SpringContextHolder;
 import com.robin.oauth2.comm.OauthConstant;
 import com.robin.oauth2.service.JdbcUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -88,6 +90,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
     @Bean
+    @DependsOn("springContextHolder")
     public JdbcUserDetailService getJdbcUserDetailService(){
         return new JdbcUserDetailService();
     }

@@ -47,7 +47,7 @@ public class LoginController {
     public Map<String,Object> ssoGetUser(HttpServletRequest request,Principal principal){
         Map<String, Object> map = new HashMap();
         try {
-            Session session = loginService.ssoGetUser(((User)(((OAuth2Authentication)principal).getPrincipal())).getUsername());
+            Session session = loginService.ssoGetUser(((OAuth2Authentication)principal).getPrincipal().toString());
             map.put("success",true);
 
             map.put("session", session);

@@ -78,7 +78,7 @@ public class DbConfig {
     @Bean(name = "sqlGen")
     @Qualifier("sqlGen")
     public BaseSqlGen getSqlGen(){
-        return new MysqlSqlGen();
+        return MysqlSqlGen.getInstance();
     }
     @Bean(name="jdbcDao")
     public JdbcDao getJdbcDao(@Qualifier("dataSource") DataSource dataSource, @Qualifier("sqlGen") BaseSqlGen sqlGen, @Qualifier("queryFactory") QueryFactory factory, @Qualifier("lobHandler") LobHandler lobhandler){

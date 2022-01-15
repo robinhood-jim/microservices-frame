@@ -58,7 +58,7 @@ server:
   port: 9092
 
 login:
-  ignoreUrls: /login,/logout,/health,/error,/refreshToken,/getSession,/validateCode
+  ignoreUrls: /login,/logout,/health,/error,/refreshToken,/getSession,/validateCode,/oauth2/oauth/token
   ignoreResources: gif,bmp,png,jpg,js,flash,css,swf,flv,metaget
   oauth2-uri: http://oauth2-service/
   clientId: webui-client
