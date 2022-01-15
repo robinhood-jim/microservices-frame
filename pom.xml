@@ -57,7 +57,7 @@
         <frm.version>1.0-SNAPSHOT</frm.version>
         <brave.version>5.4.1</brave.version>
         <swagger.version>2.7.0</swagger.version>
-        <securityoauth.version>2.3.5.RELEASE</securityoauth.version>
+        <securityoauth.version>2.3.6.RELEASE</securityoauth.version>
     </properties>
 
     <dependencyManagement>
