@@ -5,11 +5,6 @@ import com.robin.core.base.spring.SpringContextHolder;
 import com.robin.core.query.util.QueryFactory;
 import com.robin.core.sql.util.BaseSqlGen;
 import com.robin.core.sql.util.MysqlSqlGen;
-import com.robin.example.service.system.LoginService;
-import com.robin.example.service.system.SysResourceService;
-import com.robin.example.service.system.SysUserOrgService;
-import com.robin.example.service.user.SysUserResponsiblityService;
-import com.robin.example.service.user.SysUserService;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +17,6 @@ import org.springframework.context.annotation.*;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
-import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
@@ -58,10 +51,7 @@ public class DbConfig {
         return dataSource;
     }
 
-   /* @Bean
-    protected AuthorizationCodeServices authorizationCodeServices(@Qualifier("oauthdataSource") DataSource dataSource) {
-        return new JdbcAuthorizationCodeServices(dataSource);
-    }*/
+
     @Bean(name="queryFactory")
     @Qualifier("queryFactory")
     public QueryFactory getQueryFactory(){

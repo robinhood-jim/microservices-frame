@@ -1,14 +1,20 @@
 package com.robin.msf.contorller.system;
 
+import com.robin.basis.model.system.SysResource;
+import com.robin.basis.service.system.SysResourceService;
+import com.robin.basis.service.system.SysRoleService;
+import com.robin.basis.vo.LoginUserVO;
 import com.robin.core.base.exception.ServiceException;
+import com.robin.core.collection.util.CollectionMapConvert;
 import com.robin.core.convert.util.ConvertUtil;
 import com.robin.core.query.util.PageQuery;
 import com.robin.core.web.controller.AbstractCrudController;
-import com.robin.example.model.system.SysResource;
-import com.robin.example.service.system.SysResourceService;
-import com.robin.example.service.system.SysRoleService;
+import com.robin.msf.comm.utils.SecurityContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/system/menu")
@@ -27,50 +34,68 @@ public class SysResourceContorller extends AbstractCrudController<SysResource, L
     @Autowired
     private SysRoleService sysRoleService;
 
+    @GetMapping("/nav")
+    @ResponseBody
+    public Map<String,Object> nav(){
+        List<Map<String, Object>> list = service.queryBySql("select id,res_name as name,url,pid from t_sys_resource_info where RES_TYPE=? and status=?  ORDER BY RES_CODE,PID,SEQ_NO","1","1");
+        Assert.isTrue(!CollectionUtils.isEmpty(list),"");
+        //pid map
+        Map<String,List<Map<String,Object>>> map=list.stream().collect(Collectors.groupingBy(f->f.get("pid").toString()));
+
+
+        return null;
+
+
+    }
+
     @RequestMapping("/list")
     @ResponseBody
-    public Map<String, Object> list() {
+    public List<Map<String, Object>> list() {
         List<Map<String, Object>> list = service.queryBySql("select id,res_name as name,url,pid from t_sys_resource_info where RES_TYPE='1' ORDER BY RES_CODE,PID,SEQ_NO");
-        List<Map<String, Object>> retList = new ArrayList<Map<String, Object>>();
-        Map<String, Object> rmap = new HashMap<String, Object>();
-        for (Map<String, Object> map : list) {
-            String pid = map.get("pid").toString();
-            if ("0".equals(pid)) {
-                Map<String, Object> tmap = new HashMap<String, Object>();
-                tmap.put("id", map.get("id"));
-                tmap.put("text", map.get("name"));
-                rmap.put(map.get("id").toString(), tmap);
-                retList.add(tmap);
-            } else {
-                if (rmap.containsKey(pid)) {
-                    Map<String, Object> tmpmap = (Map<String, Object>) rmap.get(pid);
-                    Map<String, Object> t2map = new HashMap<String, Object>();
-                    t2map.put("id", map.get("id"));
-                    t2map.put("text", map.get("name"));
-                    List<Map<String, String>> userdataList = new ArrayList<Map<String, String>>();
-                    Map<String, String> usermap = new HashMap<String, String>();
-                    usermap.put("name", "url");
-                    usermap.put("value", map.get("url").toString());
-                    userdataList.add(usermap);
-                    t2map.put("userdata", userdataList);
-
-                    if (!tmpmap.containsKey("item")) {
-                        List<Map<String, Object>> list1 = new ArrayList<Map<String, Object>>();
-                        list1.add(t2map);
-                        tmpmap.put("item", list1);
-                    } else {
-                        List<Map<String, Object>> list1 = (List<Map<String, Object>>) tmpmap.get("item");
-                        list1.add(t2map);
-                    }
+        List<Map<String, Object>> retList = new ArrayList<>();
+        Map<String, Object> rmap = new HashMap<>();
+        LoginUserVO vo= SecurityContextUtils.getLoginUserVO();
+        Map<String,Object> userRights=service.getUserRights(vo.getUserId());
+        List<Long> avaiableTops=new ArrayList<>();
+        Map<Long,Map<String,Object>> sysMenusMap=new HashMap<>();
+        try {
+            if (!CollectionUtils.isEmpty(list)) {
+                // pid and id List
+                Map<String, List<Long>> map = CollectionMapConvert.getValuesByParentKey(list, "pid", "id", Long.class);
+                Map<Long,Map<String,Object>> idMap=list.stream().collect(Collectors.toMap(f->Long.valueOf(f.get("id").toString()),f->f));
+                List<Long> topNodes=map.get("0");
+                if(!CollectionUtils.isEmpty(userRights)){
+                    List<Map<String,Object>> permission=(List<Map<String,Object>>)userRights.get("permission");
+                    permission.forEach(f->{
+                        Long id=Long.valueOf(f.get("id").toString());
+                        if(topNodes.contains(id)){
+                            avaiableTops.add(id);
+                            sysMenusMap.put(id,idMap.get(id));
+                        }else{
+                            sysMenusMap.put(id,idMap.get(id));
+                            Long pid=Long.valueOf(f.get("pid").toString());
+                            if(sysMenusMap.get(pid).containsKey("list")){
+                                ((List<Map<String,Object>>)(sysMenusMap.get("pid").get("list"))).add(sysMenusMap.get(id));
+                            }else{
+                                List<Map<String,Object>> subList=new ArrayList<>();
+                                subList.add(sysMenusMap.get(id));
+                                sysMenusMap.get(pid).put("list",subList);
+                            }
+                        }
+                    });
                 }
+
             }
+        }catch (Exception ex){
+
         }
-        Map<String, Object> retMaps = new HashMap<String, Object>();
-        retMaps.put("id", "0");
-        retMaps.put("text", "菜单");
-        retMaps.put("item", retList);
-        return retMaps;
+
+        avaiableTops.forEach(f->{
+            retList.add(sysMenusMap.get(f));
+        });
+        return retList;
     }
+
 
     @RequestMapping("/save")
     @ResponseBody

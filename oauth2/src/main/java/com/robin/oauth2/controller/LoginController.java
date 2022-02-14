@@ -1,12 +1,11 @@
 package com.robin.oauth2.controller;
 
 
+import com.robin.basis.service.system.LoginService;
 import com.robin.core.web.util.Session;
-import com.robin.example.service.system.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2RefreshToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;

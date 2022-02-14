@@ -1,8 +1,11 @@
 package com.robin.msf.config;
 
 import com.robin.core.base.dao.JdbcDao;
+import com.robin.core.base.dao.SqlMapperDao;
+import com.robin.core.base.service.SqlMapperService;
 import com.robin.core.base.spring.SpringContextHolder;
 import com.robin.core.base.util.MessageUtils;
+import com.robin.core.query.mapper.SqlMapperConfigure;
 import com.robin.core.query.util.QueryFactory;
 import com.robin.core.sql.util.BaseSqlGen;
 import com.robin.core.sql.util.MysqlSqlGen;
@@ -17,12 +20,15 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.*;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +45,10 @@ public class DbConfig {
     private String corepassword;
     @Value("${core.type}")
     private String coretype;
-    @Value("${project.queryConfigPath}")
     private String queryConfigPath;
+    private String queryMapperCfgPath;
+    @Resource
+    private Environment environment;
 
 
     @Bean(name = "dataSource")
@@ -59,9 +67,32 @@ public class DbConfig {
     @Qualifier("queryFactory")
     public QueryFactory getQueryFactory(){
         QueryFactory factory=new QueryFactory();
+        if(environment.containsProperty("project.queryConfigPath")){
+            queryConfigPath=environment.getProperty("project.queryConfigPath");
+        }
         factory.setXmlConfigPath(queryConfigPath);
         return factory;
     }
+    @Bean
+    @Qualifier("sqlMapperConfigure")
+    public SqlMapperConfigure getSqlMapperConfigure(){
+        SqlMapperConfigure configure=new SqlMapperConfigure();
+        if(environment.containsProperty("project.queryMapperCfgPath")){
+            queryMapperCfgPath=environment.getProperty("project.queryMapperCfgPath");
+        }
+        configure.setXmlConfigPath(queryMapperCfgPath);
+        return configure;
+    }
+    @Bean
+    @Qualifier("sqlMapperDao")
+    public SqlMapperDao getSqlMapperDao(@Qualifier("sqlMapperConfigure") SqlMapperConfigure configure, @Qualifier("dataSource") DataSource dataSource,@Qualifier("sqlGen") BaseSqlGen sqlGen){
+        return new SqlMapperDao(configure,dataSource,sqlGen);
+    }
+    @Bean
+    public SqlMapperService getSqlMapperService(@Qualifier("sqlMapperDao") SqlMapperDao sqlMapperDao){
+        return new SqlMapperService(sqlMapperDao);
+    }
+
     @Bean(name="lobHandler")
     @Qualifier("lobHandler")
     public LobHandler getLobHandler(){
@@ -84,10 +115,12 @@ public class DbConfig {
      * @return
      */
     @Bean(name="jdbcDao")
+    @DependsOn("springContextHolder")
     public JdbcDao getJdbcDao(@Qualifier("dataSource") DataSource dataSource, @Qualifier("sqlGen") BaseSqlGen sqlGen, @Qualifier("queryFactory") QueryFactory factory, @Qualifier("lobHandler") LobHandler lobhandler){
         JdbcDao dao=new JdbcDao(dataSource,lobhandler,factory,sqlGen);
         return dao;
     }
+
     @Bean
     public MessageUtils getMessageUtils(){
         return new MessageUtils();

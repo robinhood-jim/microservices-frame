@@ -15,15 +15,16 @@
  */
 package com.robin.msf.contorller.user;
 
+import com.robin.basis.service.system.LoginService;
 import com.robin.core.web.controller.AbstractController;
 import com.robin.core.web.util.Session;
-import com.robin.example.service.system.LoginService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.robin.msf.comm.utils.SecurityContextUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -31,22 +32,35 @@ import java.util.Map;
 
 @Controller
 public class LoginController extends AbstractController {
-    @Autowired
+    @Resource
     private LoginService loginService;
+    @Resource
+    private Environment environment;
 
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
     @ResponseBody
-    public Map<String, Object> login(HttpServletRequest request, @RequestParam String accountName, @RequestParam String password) {
-        Map<String, Object> map = new HashMap();
+    public Map<String, Object> login(@RequestBody Map<String,Object> requestMap) {
+        Map<String, Object> map =new HashMap<>();
         try {
-            Session session = this.loginService.doLogin(accountName, password.toUpperCase());
+            Assert.notNull(requestMap.get("username"),"userName required");
+            Assert.notNull(requestMap.get("password"),"password required");
+            Map<String,String> vMap=new HashMap<>();
+            vMap.put("username",requestMap.get("username").toString());
+            vMap.put("password",requestMap.get("password").toString());
+            vMap.put("grant_type","password");
+            vMap.put("client_id",environment.getProperty("login.clientId"));
+            vMap.put("client_secret",environment.getProperty("login.clientSecret"));
+            map = this.loginService.ssoLogin(environment.getProperty("login.oauth2-uri")+"/oauth/token", vMap);
             wrapSuccess(map);
-            map.put("session", session);
         } catch (Exception ex) {
             wrapFailed(map, ex);
         }
         return map;
+    }
+    @GetMapping("/user/info")
+    public Map<String,Object> userInfo(HttpServletRequest request){
+        return SecurityContextUtils.getLoginInfo();
     }
 
     @RequestMapping(value = "/getSession")

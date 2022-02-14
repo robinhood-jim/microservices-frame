@@ -2,6 +2,7 @@ package com.robin.oauth2.config;
 
 import com.robin.oauth2.comm.OauthConstant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     private Environment environment;
     private String ignoreUrls;
     @Autowired
+    @Qualifier("tokenStore")
     private TokenStore tokenStore;
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -29,23 +31,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             ignoreUrls= OauthConstant.DEFAULT_IGONOREURLS;
         }
         String[] ignoreUrlArr=ignoreUrls.split(",");
-        http.authorizeRequests().antMatchers("/auth/**","/health").permitAll().and().formLogin().permitAll();
-        /*http.authorizeRequests().antMatchers("/login","/api/**","/oauth/**").permitAll()
-                .antMatchers("/health","/oauth/authorize","/oauth/token","/oauth/**","/login/**","/user/**","/logout/**","/oauth/token/revokeById/**").permitAll()
-                //.antMatchers(ignoreUrlArr).permitAll()
-                .anyRequest().authenticated()
-                .and().formLogin()
-                //.loginPage("/login")
-                .permitAll()
-                .and().cors().and().csrf().disable();*/
-        /*http.requestMatchers()
-                //.antMatchers("/oauth/**","/login")
-                .antMatchers(ignoreUrlArr).and().authorizeRequests()
-                .anyRequest().authenticated()
-                .and().formLogin()
-                //.loginPage("/login")
-                .permitAll()
-                .and().csrf().disable();*/
+        http.cors().and().csrf().disable().authorizeRequests().antMatchers("/oauth/token","/auth/**","/health").permitAll().and().formLogin().permitAll();
 
     }
 

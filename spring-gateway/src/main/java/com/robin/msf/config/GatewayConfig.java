@@ -19,7 +19,11 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.cors.CorsConfiguration;
+
 import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -60,7 +64,7 @@ public class GatewayConfig {
             if (CorsUtils.isCorsRequest(request)) {
                 ServerHttpResponse response = ctx.getResponse();
                 HttpHeaders headers = response.getHeaders();
-                headers.add("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+                headers.add("Access-Control-Allow-Origin", request.getHeaders().get("Origin").get(0));
                 headers.add("Access-Control-Allow-Methods", ALLOWED_METHODS);
                 headers.add("Access-Control-Max-Age", MAX_AGE);
                 headers.add("Access-Control-Allow-Headers", ALLOWED_HEADERS);
@@ -73,6 +77,17 @@ public class GatewayConfig {
             }
             return chain.filter(ctx);
         };
+    }
+    //@Bean
+    public CorsWebFilter cosFilter(){
+        UrlBasedCorsConfigurationSource source=new UrlBasedCorsConfigurationSource();
+        CorsConfiguration corsConfiguration=new CorsConfiguration();
+        corsConfiguration.addAllowedHeader(ALLOWED_HEADERS);
+        corsConfiguration.addAllowedOrigin(ALLOWED_ORIGIN);
+        corsConfiguration.addAllowedMethod(ALLOWED_METHODS);
+        corsConfiguration.setAllowCredentials(false);
+        source.registerCorsConfiguration("/**",corsConfiguration);
+        return new CorsWebFilter(source);
     }
     @Bean
     public AuthorizeFilter filter(){

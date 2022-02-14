@@ -30,7 +30,7 @@ spring:
           uri: lb://product-service
 
           predicates:
-            - Path=/product/**
+            - Path=/service/**
           filters:
             - StripPrefix=1
             - SaveSession
@@ -58,7 +58,7 @@ server:
   port: 9092
 
 login:
-  ignoreUrls: /login,/logout,/health,/error,/refreshToken,/getSession,/validateCode,/oauth2/oauth/token
+  ignoreUrls: /service/login,/service/logout,/health,/error,/service/refreshToken,/service/getSession,/service/validateCode,/oauth2/oauth/token
   ignoreResources: gif,bmp,png,jpg,js,flash,css,swf,flv,metaget
   oauth2-uri: http://oauth2-service/
   clientId: webui-client

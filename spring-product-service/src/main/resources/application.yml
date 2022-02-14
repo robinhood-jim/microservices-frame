@@ -42,3 +42,26 @@ logging:
 log:
   level: INFO
   home: ./logs
+auth-server-url: http://AUTH-SERVICE
+
+login:
+  ignoreUrls: /login,/logout,/health,/error,/user/login,/swagger-ui.html,/swagger**,/webjars/**,/v2/api-docs/**,/swagger-resources/**
+  ignoreResources: gif,bmp,png,jpg,js,flash,css,swf,flv,metaget
+  oauth2-uri: http://gateway-service/oauth2/
+  clientId: webui-client
+  clientSecret: 123456
+
+security:
+  oauth2:
+    client:
+      client-id: webclient_id
+      client-secret: 123456
+      scope: read_userinfo
+      access-token-uri: ${auth-server-url}/oauth/token
+      user-authorization-uri: ${auth-server-url}/oauth/authorize
+    resource:
+      token-info-uri: ${auth-server-url}/oauth/check_token
+      check-token: ${auth-server-url}/oauth/check_token
+
+email:
+  fromMailBox: 1@11.com

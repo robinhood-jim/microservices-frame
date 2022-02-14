@@ -1,26 +1,24 @@
 package com.robin.oauth2.config;
 
-import com.robin.core.base.spring.SpringContextHolder;
 import com.robin.oauth2.comm.OauthConstant;
 import com.robin.oauth2.service.JdbcUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.DigestUtils;
 
 
 @Configuration
-//@EnableWebSecurity
+@EnableWebSecurity
 //@Order(1)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -34,27 +32,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         String[] ignoreUrlArr=ignoreUrls.split(",");
         web.ignoring().antMatchers(ignoreUrlArr);
     }*/
-
     @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence charSequence) {
-                return DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
-            }
-
-            @Override
-            public boolean matches(CharSequence charSequence, String s) {
-                String encode = DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
-                boolean res = s.equals( encode );
-                return res;
-            }
-        };
+    public PasswordEncoder bcryptEncoder(){
+        return new BCryptPasswordEncoder();
     }
+
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(getJdbcUserDetailService()).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(getJdbcUserDetailService()).passwordEncoder(bcryptEncoder());
     }
 
     @Override
@@ -67,7 +54,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         String[] ignoreUrlArr=ignoreUrls.split(",");
         http.authorizeRequests()
                 //.antMatchers("/login","/api/**","/oauth/**").permitAll()
-                .antMatchers("/health","/login","oauth/**","/oauth/authorize","/oauth/token","/oauth/**","/login/**","/user/**","/logout/**","/oauth/token/revokeById/**").permitAll()
+                .antMatchers("/health","/login","/oauth/token","/oauth/authorize","/login/**","/user/**","/logout/**").permitAll()
                 //.antMatchers(ignoreUrlArr).permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin()

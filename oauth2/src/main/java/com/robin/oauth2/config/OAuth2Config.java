@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
@@ -32,8 +34,8 @@ import java.util.Arrays;
 public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
 
-    //@Autowired
-    //private RedisConnectionFactory redisConnectionFactory;
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
     @Autowired
     private JdbcUserDetailService userDetailService;
@@ -66,10 +68,11 @@ public class OAuth2Config extends AuthorizationServerConfigurerAdapter {
         //DataSource source= SpringContextHolder.getBean("oauthdataSource",DataSource.class);
         clients.jdbc(dataSource);
     }
-    /*@Bean
-    public TokenStore tokenStore() {
-        return new RedisTokenStorePatched(redisConnectionFactory);
-    }*/
+    @Bean
+    @Qualifier("redisTokenStore")
+    public TokenStore redistokenStore() {
+        return new RedisTokenStore(redisConnectionFactory);
+    }
     @Bean
     @Qualifier("tokenStore")
     public TokenStore tokenStore(){

@@ -1,12 +1,12 @@
 package com.robin.msf.contorller.system;
 
+import com.robin.basis.model.system.SysOrg;
+import com.robin.basis.service.system.SysOrgService;
 import com.robin.core.base.model.BaseObject;
 import com.robin.core.convert.util.ConvertUtil;
 import com.robin.core.query.util.PageQuery;
 import com.robin.core.web.controller.AbstractCrudController;
 import com.robin.core.web.util.WebConstant;
-import com.robin.example.model.system.SysOrg;
-import com.robin.example.service.system.SysOrgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Controller;

@@ -1,8 +1,8 @@
 package com.robin.oauth2.service;
 
+import com.robin.basis.model.user.SysUser;
+import com.robin.basis.service.system.LoginService;
 import com.robin.core.base.util.StringUtils;
-import com.robin.example.model.user.SysUser;
-import com.robin.example.service.system.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,7 +39,7 @@ public class JdbcUserDetailService implements UserDetailsService {
                         grants.add(new SimpleGrantedAuthority(v.get("permission").toString()));
                 });
             }
-            User.UserBuilder builder=User.withUsername(sysUser.getUserAccount()).password(sysUser.getUserPassword().toLowerCase())
+            User.UserBuilder builder=User.withUsername(sysUser.getUserAccount()).password(sysUser.getUserPassword())
                     .authorities(grants);
             UserDetails user= builder.build();
             return user;
