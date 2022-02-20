@@ -5,6 +5,7 @@ package com.robin.msf.config;
 import com.robin.msf.handler.AuthExceptionEntryPoint;
 import com.robin.msf.handler.CustomAccessDeniedHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -18,6 +19,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 import org.springframework.web.client.RestTemplate;
 
@@ -54,7 +57,7 @@ public class OauthConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        String[] ignoreUrlArr={"/health","/swagger-ui.html","/swagger**","/webjars/**","/v2/api-docs/**","/swagger-resources/**","/login","/logout", "/captcha"};
+        String[] ignoreUrlArr={"/login","/logout","/error","/health","/swagger-ui.html","/swagger-ui/**", "/swagger**","/webjars/**","/v2/api-docs/**","/swagger-resources/**", "/captcha"};
         if(environment.containsProperty("login.ignoreUrls")){
             ignoreUrlArr=environment.getProperty("login.ignoreUrls").split(",");
         }
@@ -66,8 +69,19 @@ public class OauthConfig extends ResourceServerConfigurerAdapter {
     @Bean
     @Primary
     @DependsOn({"springContextHolder"})
-    public TokenStore tokenStore() {
-        return new RedisTokenStore(connectionFactory);
+    public TokenStore tokenStore(){
+        return new JwtTokenStore(accessTokenConverter());
+    }
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey("123456");
+        return converter;
+    }
+    @Bean
+    @LoadBalanced
+    public RestTemplate getTemplate(){
+        return new RestTemplate();
     }
 
 }

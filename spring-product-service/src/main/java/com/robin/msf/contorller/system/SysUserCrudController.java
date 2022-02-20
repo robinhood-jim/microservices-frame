@@ -29,6 +29,8 @@ import com.robin.basis.model.user.SysUser;
 import com.robin.basis.service.system.SysOrgService;
 import com.robin.basis.service.system.SysResourceService;
 import com.robin.basis.service.user.SysUserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.stereotype.Controller;
@@ -44,6 +46,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/system/user")
+@Api(value = "用户管理", tags = {"用户管理"}, description = "仅管理员有权操作此菜单")
 public class SysUserCrudController extends AbstractCrudDhtmlxController<SysUser, Long, SysUserService> {
     @Autowired
     private SysOrgService sysOrgService;
@@ -54,6 +57,7 @@ public class SysUserCrudController extends AbstractCrudDhtmlxController<SysUser,
 
 
     @RequestMapping("/list")
+    @ApiOperation("列表")
     @ResponseBody
     public Map<String, Object> listUser(HttpServletRequest request, HttpServletResponse response) {
         PageQuery query = wrapPageQuery(request);
@@ -78,6 +82,7 @@ public class SysUserCrudController extends AbstractCrudDhtmlxController<SysUser,
 
     @RequestMapping("/edit/{id}")
     @ResponseBody
+    @ApiOperation("修改")
     public Map<String, Object> editUser(@PathVariable Long id) {
         return doEdit(id);
     }

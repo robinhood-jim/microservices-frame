@@ -58,7 +58,7 @@ server:
   port: 9092
 
 login:
-  ignoreUrls: /service/login,/service/logout,/health,/error,/service/refreshToken,/service/getSession,/service/validateCode,/oauth2/oauth/token
+  ignoreUrls: /service/login,/service/logout,/health,/error,/service/refreshToken,/service/getSession,/service/validateCode,/oauth2/oauth/token,swagger-ui.html,/swagger*,/webjars/*,/v2/api-docs/*,/swagger-resources/*
   ignoreResources: gif,bmp,png,jpg,js,flash,css,swf,flv,metaget
   oauth2-uri: http://oauth2-service/
   clientId: webui-client

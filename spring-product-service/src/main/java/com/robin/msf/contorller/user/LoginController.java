@@ -19,6 +19,8 @@ import com.robin.basis.service.system.LoginService;
 import com.robin.core.web.controller.AbstractController;
 import com.robin.core.web.util.Session;
 import com.robin.msf.comm.utils.SecurityContextUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -31,13 +33,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
+@Api(value = "登录", tags = {"登录管理"}, description = "仅管理员有权操作此菜单")
 public class LoginController extends AbstractController {
     @Resource
     private LoginService loginService;
     @Resource
     private Environment environment;
 
-
+    @ApiOperation("用户登录")
     @PostMapping("/login")
     @ResponseBody
     public Map<String, Object> login(@RequestBody Map<String,Object> requestMap) {
@@ -59,6 +62,8 @@ public class LoginController extends AbstractController {
         return map;
     }
     @GetMapping("/user/info")
+    @ResponseBody
+    @ApiOperation("获取登录用户信息")
     public Map<String,Object> userInfo(HttpServletRequest request){
         return SecurityContextUtils.getLoginInfo();
     }

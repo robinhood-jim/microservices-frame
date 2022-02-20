@@ -10,14 +10,13 @@ import com.robin.core.convert.util.ConvertUtil;
 import com.robin.core.query.util.PageQuery;
 import com.robin.core.web.controller.AbstractCrudController;
 import com.robin.msf.comm.utils.SecurityContextUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +28,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/system/menu")
+@Api(value = "菜单资源管理", tags = {"菜单管理"}, description = "仅管理员有权操作此菜单")
 public class SysResourceContorller extends AbstractCrudController<SysResource, Long, SysResourceService> {
 
     @Autowired
@@ -48,7 +48,8 @@ public class SysResourceContorller extends AbstractCrudController<SysResource, L
 
     }
 
-    @RequestMapping("/list")
+    @ApiOperation("用户菜单列表")
+    @GetMapping("/list")
     @ResponseBody
     public List<Map<String, Object>> list() {
         List<Map<String, Object>> list = service.queryBySql("select id,res_name as name,url,pid from t_sys_resource_info where RES_TYPE='1' ORDER BY RES_CODE,PID,SEQ_NO");
@@ -87,7 +88,7 @@ public class SysResourceContorller extends AbstractCrudController<SysResource, L
 
             }
         }catch (Exception ex){
-
+            ex.printStackTrace();
         }
 
         avaiableTops.forEach(f->{
@@ -97,7 +98,7 @@ public class SysResourceContorller extends AbstractCrudController<SysResource, L
     }
 
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public Map<String, Object> saveMenu(HttpServletRequest request,
                                         HttpServletResponse response) {
@@ -119,7 +120,7 @@ public class SysResourceContorller extends AbstractCrudController<SysResource, L
         return retmap;
     }
 
-    @RequestMapping("/showrole")
+    @GetMapping("/showrole")
     public Map<String, Object> showAssignRole(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> retMap = new HashMap<>();
         String id = request.getParameter("id");
@@ -131,13 +132,13 @@ public class SysResourceContorller extends AbstractCrudController<SysResource, L
         return retMap;
     }
 
-    @RequestMapping("/edit/{id}")
+    @GetMapping("/edit/{id}")
     @ResponseBody
     public Map<String, Object> queryUser(@PathVariable Long id) {
         return doEdit(id);
     }
 
-    @RequestMapping("/update")
+    @PostMapping("/update")
     @ResponseBody
     public Map<String, Object> updateSysResource(HttpServletRequest request,
                                                  HttpServletResponse response) {
@@ -161,7 +162,7 @@ public class SysResourceContorller extends AbstractCrudController<SysResource, L
         return retmap;
     }
 
-    @RequestMapping("/assignrole")
+    @PostMapping("/assignrole")
     @ResponseBody
     public Map<String, Object> assignRole(HttpServletRequest request) {
         String[] ids = request.getParameter("selRoleIds").split(",");

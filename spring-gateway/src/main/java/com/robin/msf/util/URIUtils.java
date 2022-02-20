@@ -1,6 +1,9 @@
 package com.robin.msf.util;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.net.URI;
+import java.net.URL;
 
 
 public class URIUtils {
@@ -20,6 +23,9 @@ public class URIUtils {
             contentPath = contentPath.substring(0, pos);
         }
         return contentPath;
+    }
+    public static String getPathFileName(String requestPath){
+        return FilenameUtils.getName(requestPath);
     }
 
     public static String getRequestRelativePathOrSuffix(String requestPath,String contentPath){
